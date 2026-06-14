@@ -77,11 +77,11 @@ If `opencode-sessions-explorer` is not installed and the user wants it, install/
 When setting up agent skills for a repo, install the selected upstream Matt Pocock skills from `mattpocock/skills`, then install this repo's two local skills. Do not vendor or install every upstream skill. Default to OpenCode:
 
 ```bash
-npx skills add mattpocock/skills --agent opencode --yes --skill diagnose grill-with-docs triage improve-codebase-architecture tdd to-issues to-prd zoom-out prototype grill-me handoff write-a-skill
-npx skills add jedzill4/skills --agent opencode --yes --skill setup-repo journalist
+npx skills add mattpocock/skills --agent opencode --yes --skill diagnose grill-with-docs triage improve-codebase-architecture tdd to-issues to-prd zoom-out prototype grill-me write-a-skill
+npx skills add jedzill4/skills --agent opencode --yes --skill setup-repo journalist handoff
 ```
 
-If running from a local checkout of this skills repo, keep the Matt Pocock command as-is and install local skills with `npx skills add . --agent opencode --yes --skill setup-repo journalist --full-depth`.
+If running from a local checkout of this skills repo, keep the Matt Pocock command as-is and install local skills with `npx skills add . --agent opencode --yes --skill setup-repo journalist handoff --full-depth`.
 
 If the repo clearly uses Claude Code or Codex instead of OpenCode, ask before switching `--agent` to `claude-code` or `codex`.
 
