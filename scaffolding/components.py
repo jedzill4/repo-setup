@@ -41,7 +41,9 @@ MATTPOCOCK_SKILLS = [
     "write-a-skill",
 ]
 DEFAULT_CI_PARTS = ["tests", "security", "docker"]
-ALL_CI_PARTS = ["tests", "security", "docker", "publish"]
+# "opencode" is opt-in only (off by default): it needs repo secrets and the
+# OpenCode GitHub App installed, so it is never added unless explicitly chosen.
+ALL_CI_PARTS = ["tests", "security", "docker", "publish", "opencode"]
 AGENT_CHOICES = ["opencode", "claude-code", "codex"]
 
 
@@ -258,7 +260,7 @@ def plan_ci(ctx: Context) -> list[Op]:
         Decision(
             2,
             "ci_parts",
-            "Which CI parts? (tests,security,docker,publish)",
+            "Which CI parts? (tests,security,docker,publish,opencode)",
             ",".join(DEFAULT_CI_PARTS),
         )
     )
@@ -270,6 +272,15 @@ def plan_ci(ctx: Context) -> list[Op]:
                 ctx.root / ".github/workflows/zizmor.yml",
                 template_text("github/workflows/zizmor.yml"),
                 ".github/workflows/zizmor.yml",
+                ctx.guide_url,
+            )
+        )
+        ops.append(
+            _write_if_absent(
+                "ci",
+                ctx.root / ".github/zizmor.yml",
+                template_text("github/zizmor.yml"),
+                ".github/zizmor.yml",
                 ctx.guide_url,
             )
         )
@@ -334,6 +345,16 @@ def plan_ci(ctx: Context) -> list[Op]:
                     ctx.guide_url,
                 )
             )
+    if "opencode" in parts:
+        ops.append(
+            _write_if_absent(
+                "ci",
+                ctx.root / ".github/workflows/opencode.yml",
+                template_text("github/workflows/opencode.yml"),
+                ".github/workflows/opencode.yml",
+                ctx.guide_url,
+            )
+        )
     if not ops:
         ops.append(Op("ci", "noop", "ci", Disposition.SKIP, detail="no applicable CI parts"))
     return ops

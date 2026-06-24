@@ -38,12 +38,15 @@ jobs:
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
           fetch-depth: 0 # hatch-vcs needs tags/history
+          persist-credentials: false
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
           version: "0.11.12"
-          enable-cache: true
+          # Cache disabled in the publish job: it runs with id-token: write
+          # (OIDC Trusted Publishing), so a poisoned cache could taint it.
+          enable-cache: false
 
       - name: Build sdist and wheel
         run: uv build

@@ -5,6 +5,10 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    # Wait a few days after a release before opening update PRs, to dodge
+    # freshly-published (and potentially compromised) versions.
+    cooldown:
+      default-days: 7
     groups:
       actions:
         patterns: ["*"]
@@ -14,4 +18,6 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5

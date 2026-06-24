@@ -11,31 +11,36 @@ on:
     tags:
       - "v*.*.*"
 
-permissions:
-  contents: write
-
+# No top-level permissions: grant least privilege per job instead.
 jobs:
   # Run the full Tests suite against the tagged commit first; release depends
   # on it via `needs`, so a failing build never produces a Release.
   test:
     name: tests
+    permissions:
+      contents: read
     uses: ./.github/workflows/tests.yml
 
   release:
     name: build & github release
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
         with:
           # hatch-vcs needs the full history + tags to derive the version.
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
           version: "0.11.12"
-          enable-cache: true
+          # Cache disabled in the release job: it runs with contents: write on
+          # tag push, so a poisoned cache could taint a privileged build.
+          enable-cache: false
 
       - name: Build sdist and wheel
         run: uv build
