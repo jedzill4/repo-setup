@@ -50,7 +50,7 @@ priority = 2
 [[repos.hooks]]
 id = "file-size-guard"
 name = "file-size-guard (400 large / 700 enormous)"
-entry = "python -c \"import sys; sys.exit(max([0] + [1 for f in sys.argv[1:] for n in [sum(1 for _ in open(f, errors='ignore'))] if (n >= 700 and not print(f'Error: {f} is too large ({n} lines, limit is 700)')) or (n >= 400 and not print(f'Warning: {f} is large ({n} lines, recommended limit is 400)') and False)]))\""
+entry = "python -c \"import sys; sys.exit(max([0] + [1 for f in sys.argv[1:] for n in [sum(1 for _ in open(f, errors='ignore'))] if (n >= 700 and not print(f'Error: CES-71 (file-size-guard): {f} is too large ({n} lines, limit is 700)')) or (n >= 400 and not print(f'Warning: CES-71 (file-size-guard): {f} is large ({n} lines, recommended limit is 400)') and False)]))\""
 language = "system"
 types = ["python"]
 priority = 2

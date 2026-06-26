@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from scaffolding import console
 from scaffolding.components import REGISTRY, Component, Context, lookup
-from scaffolding.facts import Facts
 from scaffolding.plan import Decisions, Disposition, Op, Plan
-from scaffolding.settings import Settings
+
+if TYPE_CHECKING:
+    from scaffolding.facts import Facts
+    from scaffolding.settings import Settings
 
 
 class NotAGitRepo(Exception):
@@ -140,7 +143,7 @@ def _apply_run(op: Op) -> bool:
         console.warn(f"{op.target}: no command")
         return op.optional
     try:
-        ok = subprocess.run(op.cmd).returncode == 0
+        ok = subprocess.run(op.cmd, check=False).returncode == 0
     except OSError as exc:
         ok = False
         console.warn(f"{op.target}: {exc}")

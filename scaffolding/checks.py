@@ -33,6 +33,7 @@ def _git_tracked(root: Path, rel: str) -> bool:
             capture_output=True,
             text=True,
             timeout=10,
+            check=False,
         )
         return out.returncode == 0
     except Exception:
@@ -47,6 +48,7 @@ def _gitignored(root: Path, rel: str) -> bool:
             capture_output=True,
             text=True,
             timeout=10,
+            check=False,
         )
         return out.returncode == 0
     except Exception:

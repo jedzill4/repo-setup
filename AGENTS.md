@@ -31,6 +31,27 @@ Run it against each changed skill (e.g. `tessl skill review skills/productivity/
 and resolve the reported issues before publishing.
 
 
+## Engineering Standards coding (CES)
+
+House standards shipped by the scaffolder are catalogued as **CES — Collective
+Engineering Standard**. Canonical spec: **`docs/engineering-standards.md`** (single
+source of truth). The rules below are the always-on summary; when adding, editing,
+or referencing a rule in this repo, follow this convention:
+
+- **`CES-<issue#>`** is the citable catalog code; the **kebab-case slug** is the
+  machine id (ast-grep `id:`, prek hook id, `.agents/rules/<slug>.md`,
+  `# ast-grep-ignore: <slug>`). Never put the CES number in the machine id.
+- **Every CES has a tracker issue.** One CES = one standard; a standard may ship
+  multiple slugs (e.g. `CES-79` ships the four `no-dict-*` patterns). The issue id
+  is the number — gaps from declined proposals are expected (PEP/RFC-style).
+- **Already-implemented rules** get a retroactive AS-BUILT issue so they fit the
+  invariant — never assign a code to a rule that only exists in code.
+- **Violation messages must embed the code**, e.g.
+  `message: "CES-46 (log-no-print): libraries log, they don't print …"`. Keep the
+  slug as the suppression key so tooling stays stable.
+- Canonical map + per-rule detail live in the `## Engineering Standards` index and
+  `.agents/rules/<slug>.md`; canonical code lives in `snippets/`.
+
 ## Domain docs
 
 Single-context — `CONTEXT.md` + `docs/adr/` at the repo root (created lazily).

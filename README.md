@@ -113,3 +113,6 @@ you actually use.
 - `guide.md` — the agentic-install guide (judgment layer).
 - `skills/productivity/journalist` — local daily session journals under `.journals/`.
 - `skills/productivity/handoff` — compact the current session into a temp-dir handoff for another agent.
+- `docs/engineering-standards.md` — **CES (Collective Engineering Standard)**: how house
+  rules are coded, cited (`CES-<issue#>` + slug), and shipped. Single source of truth,
+  referenced by `AGENTS.md`.

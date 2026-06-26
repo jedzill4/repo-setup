@@ -36,6 +36,7 @@ def repo_visibility() -> str:
             capture_output=True,
             text=True,
             timeout=15,
+            check=False,
         )
         if out.returncode == 0:
             return out.stdout.strip().lower() or "unknown"

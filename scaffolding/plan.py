@@ -7,7 +7,7 @@ from enum import StrEnum
 
 from pydantic import BaseModel
 
-from scaffolding.facts import Facts
+from scaffolding.facts import Facts  # noqa: TC001 (pydantic PlanReport resolves Facts at runtime)
 
 
 class Disposition(StrEnum):

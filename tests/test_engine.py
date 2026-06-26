@@ -3,14 +3,19 @@
 from __future__ import annotations
 
 import subprocess
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
+from scaffolding.components import AGENTS_MARKER, STANDARDS_MARKER
 from scaffolding.engine import UnknownComponent, apply, build_plan, select_components
 from scaffolding.facts import detect
 from scaffolding.plan import Decisions, Disposition
 from scaffolding.settings import Settings
+from scaffolding.templates_registry import template_text
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def _git_init(path: Path) -> None:
@@ -111,6 +116,71 @@ def test_gitignore_partial_append(repo: Path):
     assert ".env" in lines
     assert ".journals/" in lines
     assert lines.count(".env") == 1
+
+
+# test helper: a target->disposition lookup map is a legitimate dict boundary
+# ast-grep-ignore: no-dict-return-annotation
+def _standards_dispositions(plan) -> dict[str, Disposition]:
+    return {op.target: op.disposition for op in plan.ops if op.component == "standards"}
+
+
+def test_standards_clean_repo_adds_index_rules_snippets(repo: Path):
+    (repo / "app.py").write_text("x = 1\n")
+    plan = build_plan(repo, _facts(repo), Settings(), requested=["standards"])
+    disp = _standards_dispositions(plan)
+    adds = {t for t, d in disp.items() if d is Disposition.ADD}
+    assert "AGENTS.md" in adds
+    assert ".agents/rules/no-dict.md" in adds
+    assert ".agents/rules/file-size-guard.md" in adds
+    assert "snippets/no-dict-boundary.py" in adds
+    # the `agents` dependency is pulled in so AGENTS.md has a base to append to.
+    assert any("required by standards" in n for n in plan.notices)
+
+
+def test_standards_gated_out_on_nonpython(repo: Path):
+    plan = build_plan(repo, _facts(repo), Settings(skip_skills=True, skip_varlock=True))
+    comps = {op.component for op in plan.ops}
+    assert "standards" not in comps
+
+
+def test_standards_defers_and_skips_when_present(repo: Path):
+    (repo / "app.py").write_text("x = 1\n")
+    settings = Settings(skip_skills=True, skip_varlock=True)
+    plan = build_plan(repo, _facts(repo), settings, requested=["standards"])
+    apply(plan, repo)
+    assert (repo / ".agents/rules/no-dict.md").exists()
+    assert (repo / "snippets/no-dict-boundary.py").exists()
+    body = (repo / "AGENTS.md").read_text()
+    assert STANDARDS_MARKER in body
+    assert AGENTS_MARKER in body
+
+    plan2 = build_plan(repo, _facts(repo), settings, requested=["standards"])
+    disp = _standards_dispositions(plan2)
+    assert disp[".agents/rules/no-dict.md"] is Disposition.DEFER
+    assert disp[".agents/rules/file-size-guard.md"] is Disposition.DEFER
+    assert disp["snippets/no-dict-boundary.py"] is Disposition.DEFER
+    assert disp["AGENTS.md"] is Disposition.SKIP
+
+    # Re-apply must not duplicate the section or overwrite the workspace-defaults section.
+    apply(plan2, repo)
+    body2 = (repo / "AGENTS.md").read_text()
+    assert body2.count(STANDARDS_MARKER) == 1
+    assert AGENTS_MARKER in body2
+
+
+def test_ces_codes_embedded_in_as_built_rule_messages():
+    for slug in (
+        "no-dict-call-return",
+        "no-dict-literal-return",
+        "no-dict-return-annotation",
+        "no-dict-alias",
+    ):
+        body = template_text(f"ast-grep-rules/{slug}.yml")
+        assert f"CES-79 ({slug})" in body
+        assert f"id: {slug}" in body  # slug / suppression key unchanged
+    prek = template_text("prek-python.toml")
+    assert "CES-71 (file-size-guard)" in prek
+    assert 'id = "file-size-guard"' in prek  # prek hook id (suppression key) unchanged
 
 
 def test_select_skip(repo: Path):

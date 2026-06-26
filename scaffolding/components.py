@@ -9,17 +9,28 @@ from __future__ import annotations
 
 import contextlib
 import subprocess
-from collections.abc import Callable
 from dataclasses import dataclass, field
-from pathlib import Path
+from typing import TYPE_CHECKING
 
-from scaffolding.facts import Facts
 from scaffolding.plan import Decision, Decisions, Disposition, Op
-from scaffolding.settings import Settings
 from scaffolding.templates_registry import template_text
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from pathlib import Path
+
+    from scaffolding.facts import Facts
+    from scaffolding.settings import Settings
 
 GITIGNORE_ENTRIES = [".env", "!.env.schema", ".tmp/", ".scratch/", ".worktrees/", ".journals/"]
 AGENTS_MARKER = "## Repo Workspace Defaults"
+# Marker-gated section the `standards` component owns in AGENTS.md (sibling to AGENTS_MARKER).
+STANDARDS_MARKER = "## Engineering Standards"
+# Per-CES detail files under .agents/rules/ shipped by the standards component. One file per
+# standard (a CES may ship several ast-grep/prek slugs but documents them in one detail file).
+STANDARDS_RULE_DETAILS = ["no-dict", "file-size-guard"]
+# Canonical drop-in / comparison code shipped under snippets/.
+STANDARDS_SNIPPETS = ["no-dict-boundary.py"]
 ASTGREP_RULES = [
     "no-dict-call-return",
     "no-dict-literal-return",
@@ -89,6 +100,7 @@ def infer_project_name(root: Path) -> str:
             capture_output=True,
             text=True,
             timeout=5,
+            check=False,
         )
         if out.returncode == 0 and out.stdout.strip():
             tail = out.stdout.strip().rstrip("/").split("/")[-1].removesuffix(".git")
@@ -335,27 +347,27 @@ def plan_ci(ctx: Context) -> list[Op]:
                 )
             )
     if "publish" in parts:
-        for wf in ("release.yml", "pypi.yml"):
-            ops.append(
-                _write_if_absent(
-                    "ci",
-                    ctx.root / f".github/workflows/{wf}",
-                    template_text(f"github/workflows/{wf}"),
-                    f".github/workflows/{wf}",
-                    ctx.guide_url,
-                )
+        ops += [
+            _write_if_absent(
+                "ci",
+                ctx.root / f".github/workflows/{wf}",
+                template_text(f"github/workflows/{wf}"),
+                f".github/workflows/{wf}",
+                ctx.guide_url,
             )
+            for wf in ("release.yml", "pypi.yml")
+        ]
     if "opencode" in parts:
-        for wf in ("opencode.yml", "proposal-update.yml"):
-            ops.append(
-                _write_if_absent(
-                    "ci",
-                    ctx.root / f".github/workflows/{wf}",
-                    template_text(f"github/workflows/{wf}"),
-                    f".github/workflows/{wf}",
-                    ctx.guide_url,
-                )
+        ops += [
+            _write_if_absent(
+                "ci",
+                ctx.root / f".github/workflows/{wf}",
+                template_text(f"github/workflows/{wf}"),
+                f".github/workflows/{wf}",
+                ctx.guide_url,
             )
+            for wf in ("opencode.yml", "proposal-update.yml")
+        ]
     if not ops:
         ops.append(Op("ci", "noop", "ci", Disposition.SKIP, detail="no applicable CI parts"))
     return ops
@@ -397,6 +409,56 @@ def plan_agents(ctx: Context) -> list[Op]:
             detail="create with section",
         )
     ]
+
+
+def _standards_index_op(ctx: Context) -> Op:
+    """Append the marker-gated ## Engineering Standards index to AGENTS.md (idempotent)."""
+    dest = ctx.root / "AGENTS.md"
+    section = template_text("standards-index.md")
+    if dest.exists() and STANDARDS_MARKER in dest.read_text(encoding="utf-8"):
+        return Op(
+            "standards",
+            "noop",
+            "AGENTS.md",
+            Disposition.SKIP,
+            detail=f"{STANDARDS_MARKER} already present",
+        )
+    # Always append (never create/overwrite): the `agents` dep creates the AGENTS.md base, and
+    # _apply_append tolerates a missing file, so this can never clobber an existing AGENTS.md.
+    return Op(
+        "standards",
+        "append",
+        "AGENTS.md",
+        Disposition.ADD,
+        path=str(dest),
+        content="\n" + section,
+        detail="append Engineering Standards index",
+    )
+
+
+def plan_standards(ctx: Context) -> list[Op]:
+    ops = [_standards_index_op(ctx)]
+    ops += [
+        _write_if_absent(
+            "standards",
+            ctx.root / ".agents" / "rules" / f"{slug}.md",
+            template_text(f"agents-rules/{slug}.md"),
+            f".agents/rules/{slug}.md",
+            ctx.guide_url,
+        )
+        for slug in STANDARDS_RULE_DETAILS
+    ]
+    ops += [
+        _write_if_absent(
+            "standards",
+            ctx.root / "snippets" / snippet,
+            template_text(f"snippets/{snippet}"),
+            f"snippets/{snippet}",
+            ctx.guide_url,
+        )
+        for snippet in STANDARDS_SNIPPETS
+    ]
+    return ops
 
 
 def plan_skills(ctx: Context) -> list[Op]:
@@ -502,6 +564,15 @@ REGISTRY: list[Component] = [
     ),
     Component("ci", "GitHub Actions workflows + dependabot", 2, False, _always, plan_ci),
     Component("agents", "AGENTS.md workspace-defaults section", 1, True, _always, plan_agents),
+    Component(
+        "standards",
+        "Engineering Standards index + .agents/rules detail + snippets",
+        1,
+        True,
+        _python,
+        plan_standards,
+        deps=lambda f: ["agents"],
+    ),
     Component("skills", "Install curated agent skills via npx", 2, True, _always, plan_skills),
     Component("varlock", "Varlock secret schema init", 3, True, _always, plan_varlock),
 ]

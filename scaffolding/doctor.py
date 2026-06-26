@@ -6,9 +6,12 @@ import contextlib
 import shutil
 import subprocess
 from dataclasses import dataclass
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from scaffolding.facts import detect
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 @dataclass
@@ -32,7 +35,9 @@ _TOOLS = {
 def _version(cmd: str) -> str:
     for flag in ("--version", "version", "-V"):
         with contextlib.suppress(OSError, subprocess.SubprocessError, IndexError):
-            out = subprocess.run([cmd, flag], capture_output=True, text=True, timeout=8)
+            out = subprocess.run(
+                [cmd, flag], capture_output=True, text=True, timeout=8, check=False
+            )
             if out.returncode == 0:
                 return (out.stdout or out.stderr).strip().splitlines()[0]
     return ""

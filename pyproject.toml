@@ -20,10 +20,7 @@ dependencies = [
 scaffolding = "scaffolding.cli:app"
 
 [dependency-groups]
-dev = [
-  "pytest>=8.0",
-  "ruff>=0.7.0",
-]
+dev = ["pytest>=8.0", "ruff>=0.7.0"]
 
 # Version derived from git tags (vX.Y.Z) by hatch-vcs.
 [tool.hatch.version]
@@ -37,8 +34,9 @@ include = ["scaffolding", "README.md", "guide.md"]
 
 [tool.ruff]
 line-length = 100
-# Vendored skill scripts are independent artifacts; lint only the tool's code.
-extend-exclude = ["skills"]
+# Vendored skill scripts and bundled template payload (snippets/ drop-ins shipped
+# verbatim into target repos) are independent artifacts; lint only the tool's code.
+extend-exclude = ["skills", "scaffolding/templates"]
 force-exclude = true
 
 [tool.ruff.lint]
@@ -46,19 +44,29 @@ select = [
   "E",
   "F",
   "I",
+  "C4",
+  "C90",
+  "ICN",
+  "INP",
+  "PIE",
+  "PT",
+  "TC",
+  "PGH",
+  "NPY",
+  "PLE",
+  "PLW",
+  "FA",
   "B",
+  "S",
+  "G",
   "SIM",
   "RET",
-  "C4",
   "DTZ",
   "PTH",
   "LOG",
-  "S",
-  "C90",
-  "G",
+  "TID",
   "UP",
   "RUF",
-  "TID",
   "ERA001",
   "D200",
   "D205",
@@ -82,12 +90,17 @@ select = [
   "D417",
   "D418",
   "D419",
+  "PERF",
 ]
+
 # This is a CLI orchestrator: shelling out to known tools (git, uv, npx,
 # varlock, gh) by name is intentional, so the subprocess-audit rules that flag
 # that pattern are disabled. The rest of the security ruleset stays on.
 ignore = ["S603", "S607"]
 task-tags = ["TODO", "FIXME", "XXX", "MARK"]
+
+[tool.ruff.format]
+quote-style = "double"
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -101,7 +114,7 @@ max-complexity = 10
 ban-relative-imports = "all"
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101"]
+"tests/**" = ["S101", "INP001"]
 
 [tool.pyrefly]
 project-excludes = [
@@ -109,7 +122,7 @@ project-excludes = [
   "**/__pycache__",
   "**/.venv/**/*",
   "skills/**/*",
-  "review/**/*",  # separate distribution with its own env/import-root
+  "review/**/*",     # separate distribution with its own env/import-root
 ]
 use-ignore-files = false
 disable-project-excludes-heuristics = true
