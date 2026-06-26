@@ -42,3 +42,9 @@ rules are reviewer/agent judgment. Full convention: `docs/engineering-standards.
   and `sessionmaker` belong in a dedicated `database` package, not under `persistence/`/`meta/`/`core/`.
   Placement-scoped; the import-linter contract lands commented in Slice 09. Slug:
   `arch-database-package`. → `@.agents/rules/arch-database-package.md`
+- **CES-63 · no catch-all modules** `[prek]` — no `utils.py`/`helpers.py`/`aux.py`/`misc.py`/`common.py`
+  (outside `tests/`); name a module for what it holds. Slug: `no-utils`. →
+  `@.agents/rules/no-utils.md`
+- **CES-32 · keep non-code out of the package** `[prek]` — no notebooks/`resources/`/`reports/`/`data/`
+  inside the import package. Parametrized by a `{{ import_package }}` placeholder resolved at
+  install time. Slug: `repo-shape`. → `@.agents/rules/repo-shape.md`

@@ -38,6 +38,8 @@ STANDARDS_RULE_DETAILS = [
     "settings-module",
     "cli-typed-framework",
     "arch-database-package",
+    "no-utils",
+    "repo-shape",
 ]
 # Canonical drop-in / comparison code shipped under snippets/ (may be nested, e.g. core/logger.py).
 STANDARDS_SNIPPETS = ["no-dict-boundary.py", "core/logger.py", "api-schemas.py", "settings.py"]
