@@ -34,9 +34,10 @@ STANDARDS_RULE_DETAILS = [
     "log-get-logger",
     "log-no-print",
     "core-logger",
+    "api-schemas-extra-forbid",
 ]
 # Canonical drop-in / comparison code shipped under snippets/ (may be nested, e.g. core/logger.py).
-STANDARDS_SNIPPETS = ["no-dict-boundary.py", "core/logger.py"]
+STANDARDS_SNIPPETS = ["no-dict-boundary.py", "core/logger.py", "api-schemas.py"]
 ASTGREP_RULES = [
     "no-dict-call-return",
     "no-dict-literal-return",
@@ -44,6 +45,7 @@ ASTGREP_RULES = [
     "no-dict-alias",
     "log-get-logger",
     "log-no-print",
+    "api-schemas-extra-forbid",
 ]
 MATTPOCOCK_SKILLS = [
     "setup-matt-pocock-skills",

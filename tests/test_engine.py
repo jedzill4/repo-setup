@@ -203,6 +203,33 @@ def test_logging_rules_embed_ces_codes_and_warn_severity():
     assert "def get_logger" in snippet
 
 
+def test_standards_api_schemas_rule_adds_detail_and_snippet(repo: Path):
+    (repo / "app.py").write_text("x = 1\n")
+    plan = build_plan(repo, _facts(repo), Settings(), requested=["standards"])
+    disp = _standards_dispositions(plan)
+    adds = {t for t, d in disp.items() if d is Disposition.ADD}
+    assert ".agents/rules/api-schemas-extra-forbid.md" in adds
+    assert "snippets/api-schemas.py" in adds
+
+
+def test_astgrep_ships_api_schemas_rule(repo: Path):
+    (repo / "app.py").write_text("x = 1\n")
+    plan = build_plan(repo, _facts(repo), Settings(), requested=["ast-grep"])
+    adds = {op.target for op in plan.by(Disposition.ADD) if op.component == "ast-grep"}
+    assert "ast-grep/rules/api-schemas-extra-forbid.yml" in adds
+
+
+def test_api_schemas_rule_is_ces_coded_and_placement_scoped():
+    body = template_text("ast-grep-rules/api-schemas-extra-forbid.yml")
+    assert "CES-4 (api-schemas-extra-forbid)" in body
+    assert "id: api-schemas-extra-forbid" in body
+    assert "severity: warning" in body
+    assert "severity: info" not in body
+    # placement-scoped via files: so it is inert outside api/ schema packages.
+    assert "**/api/**/schemas/requests/**/*.py" in body
+    assert "**/api/**/schemas/responses/**/*.py" in body
+
+
 def test_ces_codes_embedded_in_as_built_rule_messages():
     for slug in (
         "no-dict-call-return",

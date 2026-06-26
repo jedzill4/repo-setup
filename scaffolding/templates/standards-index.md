@@ -28,3 +28,7 @@ rules are reviewer/agent judgment. Full convention: `docs/engineering-standards.
 - **CES-74 · the house logger** `[snippet]` — `snippets/core/logger.py` is the canonical structlog
   setup (JSON in prod, colored console in dev, level from `LOG_LEVEL`). Drop it in at
   `<pkg>/core/logger.py`. Slug: `core-logger`. → `@.agents/rules/core-logger.md`
+- **CES-4 · API schemas forbid extras** `[ast-grep]` — every request/response `BaseModel` under
+  `api/**/schemas/{requests,responses}` must set `model_config = ConfigDict(extra="forbid")`.
+  Placement-scoped: inert for internal/domain models and non-API repos. Slug:
+  `api-schemas-extra-forbid`. → `@.agents/rules/api-schemas-extra-forbid.md`
