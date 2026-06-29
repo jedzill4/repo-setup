@@ -22,3 +22,6 @@ __pycache__/
 .scratch/
 .worktrees/
 .journals/
+*.png
+*.svg
+!assets/logo.png

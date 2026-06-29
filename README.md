@@ -1,4 +1,24 @@
-# scaffolding
+<p align="center">
+  <img src="assets/logo.png" alt="scaffolding — agent-driven repo bootstrap + recurring skills" style="width:600px; max-width:100%; height:auto;" />
+</p>
+
+<p align="center">
+  <em>Clean-adds-only repo bootstrap CLI — plus a couple of recurring agent skills.</em>
+</p>
+
+<p align="center">
+  <a href="https://github.com/jedzill4/scaffolding/releases"><img alt="Release" src="https://img.shields.io/github/v/release/jedzill4/scaffolding?logo=github" /></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white" alt="Python 3.11+"></a>
+  <a href="https://opencode.ai/"><img src="https://img.shields.io/badge/Agent-OpenCode--first-1d1d1d?logo=anthropic&logoColor=white" alt="OpenCode-first"></a>
+  <a href="https://docs.astral.sh/uv/"><img src="https://img.shields.io/badge/Install-uvx%20%C2%B7%20curl-261230?logo=astral&logoColor=white" alt="Install via uvx or curl" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+</p>
+
+---
+
+**Source Code**: [https://github.com/jedzill4/scaffolding](https://github.com/jedzill4/scaffolding)
+
+---
 
 Personal repo bootstrap + agent skills for OpenCode-first development.
 
